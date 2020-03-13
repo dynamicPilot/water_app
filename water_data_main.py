@@ -14,6 +14,7 @@ from show_stats_class import TableStatsAnalysis, GraphStatsAnalysis
 from water_form import WaterForm
 from history_class import DisplayHistory
 from settings_class import Settings
+from show_prediction_class import Prediction
 
 import PyQt5 as puqt5
 from PyQt5 import QtCore
@@ -122,7 +123,8 @@ class MainWindow(QMainWindow):
         self.stats_table_window.show()
 
     def show_prediction(self):
-        pass
+        self.predict_window = Prediction(self.data_class)
+        self.predict_window.show()
 
     def show_stats_graph(self):
         self.stats_graph_window = GraphStatsAnalysis(self.data_class)

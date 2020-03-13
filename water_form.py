@@ -5,6 +5,7 @@ QWidget Class for method
 import config as c
 import sys
 import re
+import os
 
 import pandas as pd
 
@@ -54,8 +55,14 @@ class WaterForm(QWidget):
 
         self.save_btn = QPushButton('Save data', self)
 
+        v_layout = QVBoxLayout()
+        header_label = QLabel('SET NEW VALUES', self, margin = 10)
+        header_label.setStyleSheet("font: 14pt")
+        header_label.setAlignment(QtCore.Qt.AlignCenter)
+        v_layout.addWidget(header_label)
+
         grid = QGridLayout()
-        grid.setSpacing(10)
+        grid.setSpacing(35)
 
         grid.addWidget(month_label, 1, 0)
         grid.addWidget(self.month_list, 1, 1)
@@ -70,10 +77,15 @@ class WaterForm(QWidget):
         grid.addWidget(self.cw_edit, 3, 1, 1, 2)
         grid.addWidget(self.cw_btn, 3, 3)
 
-        grid.addWidget(self.save_btn, 4, 3)
-        self.save_btn.clicked.connect(self.save_values_to_data)
+        v_layout.addLayout(grid)
+        v_layout.addStretch(1)
 
-        self.setLayout(grid)
+        h_box = QHBoxLayout()
+        h_box.addStretch(1)
+        h_box.addWidget(self.save_btn)
+        self.save_btn.clicked.connect(self.save_values_to_data)
+        v_layout.addLayout(h_box)
+        self.setLayout(v_layout)
 
     def month_activate(self, text):
         self.new_value_list[0] = str(text)
@@ -89,6 +101,8 @@ class WaterForm(QWidget):
             value = self.show_win_dialog_for_hot()
             if value > self.hvs_prev_month:
                 mark = False
+            elif value == -1:
+                return
             else:
                 mes_text = "Your value {:.3f} is incorrect. \nPlease, enter new value for hot water, which is more then {:.3f}.".format(value, self.hvs_prev_month)
                 mes = QMessageBox()
@@ -105,6 +119,8 @@ class WaterForm(QWidget):
             value = self.show_win_dialog_for_cold()
             if value > self.cvs_prev_month:
                 mark = False
+            elif value == -1:
+                return
             else:
                 mes_text = "Your value {:.3f} is incorrect. \nPlease, enter new value for cold water, which is more then {:.3f}.".format(value, self.cvs_prev_month)
                 mes = QMessageBox()
@@ -118,27 +134,32 @@ class WaterForm(QWidget):
     def show_win_dialog_for_hot(self):
         text, ok = QInputDialog.getText(self, 'Input value',
             'Enter hot water counter value:')
-        if len(re.findall(r"[^\d\.]", str(text))) > 0:
-            value = 0.
-        else:
-            value = float(text)
 
         if ok:
+            if len(re.findall(r"[^\d\.]", str(text))) > 0 or len(str(text)) == 0:
+                value = 0.
+            else:
+                value = float(text)
             return value
+        else:
+            return -1
             
     def show_win_dialog_for_cold(self):
         text, ok = QInputDialog.getText(self, 'Input value',
             'Enter cold water counter value:')
-        if len(re.findall(r"[^\d\.]", str(text))) > 0:
-            value = 0.
-        else:
-            value = float(text)
 
         if ok:
+            if len(re.findall(r"[^\d\.]", str(text))) > 0 or len(str(text)) == 0:
+                value = 0.
+            else:
+                value = float(text)
             return value
+        else:
+            return -1
             
     def save_values_to_data(self):
         self.data_class.add_data(self.new_value_list)
         self.new_value_list = ['', 2020, 0, 0]
         self.new_data_analysis_window = NewValueAnalysis(self.data_class)
         self.new_data_analysis_window.show()
+
