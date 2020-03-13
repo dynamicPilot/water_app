@@ -74,12 +74,14 @@ class DataProcessing():
         self.data['PRICE_CVS'] = 0.00
         self.data['PRICE_HVS'] = 0.00
         self.data['TOTAL'] = 0.00
+        self.data['TOTAL_DELTA'] = 0.00
         for i in range(1, len(self.data)):
             self.data['DELTA_CVS'].loc[i] = self.data['CVS'].loc[i] - self.data['CVS'].loc[i-1]
             self.data['DELTA_HVS'].loc[i] = self.data['HVS'].loc[i] - self.data['HVS'].loc[i-1]
             self.data['PRICE_CVS'].loc[i] = self.data['DELTA_CVS'].loc[i] * self.cold_water_price
             self.data['PRICE_HVS'].loc[i] = self.data['DELTA_HVS'].loc[i] * self.hot_water_price
-            self.data['TOTAL'].loc[i] =  self.data['PRICE_CVS'].loc[i] + self.data['PRICE_HVS'].loc[i]
+            self.data['TOTAL'].loc[i] = self.data['PRICE_CVS'].loc[i] + self.data['PRICE_HVS'].loc[i]
+            self.data['TOTAL_DELTA'].loc[i] = self.data['DELTA_CVS'].loc[i] + self.data['DELTA_HVS'].loc[i]
 
 
     def data_to_new_value_analysis(self):
@@ -101,7 +103,9 @@ class DataProcessing():
         'hvs_aver': hvs_aver,
         'total_aver': self.data['TOTAL'].loc[:i].mean(),
         'price_cvs_pred': self.prediction_for_three_month['cold'][0]*self.cold_water_price,
-        'price_hvs_pred': self.prediction_for_three_month['hot'][0]*self.hot_water_price}
+        'price_hvs_pred': self.prediction_for_three_month['hot'][0]*self.hot_water_price,
+        'total_delta': self.data['TOTAL_DELTA'].loc[i],
+        'total_delta_aver': self.data['TOTAL_DELTA'].loc[:i].mean()}
 
         #self.create_graphs_to_new_value_analysis()
         return result_dict
@@ -242,9 +246,9 @@ class DataProcessing():
         rows_name = ['Average value per year', 'Average cost per year', 'Average value', 'Average cost']
 
 
-        data_aver_value_per_year = [self.data[self.data['YEAR'] == self.current_year]['DELTA_CVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['DELTA_HVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['DELTA_CVS'].mean() + self.data[self.data['YEAR'] == self.current_year]['DELTA_HVS'].mean()]
+        data_aver_value_per_year = [self.data[self.data['YEAR'] == self.current_year]['DELTA_CVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['DELTA_HVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['TOTAL_DELTA'].mean()]
         data_aver_cost_per_year = [self.data[self.data['YEAR'] == self.current_year]['PRICE_CVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['PRICE_HVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['TOTAL'].mean()]
-        data_aver_value = [self.data['DELTA_CVS'].mean(), self.data['DELTA_HVS'].mean(), self.data['DELTA_CVS'].mean()+self.data['DELTA_HVS'].mean()]
+        data_aver_value = [self.data['DELTA_CVS'].mean(), self.data['DELTA_HVS'].mean(), self.data['TOTAL_DELTA'].mean()]
         data_aver_cost = [self.data['PRICE_CVS'].mean(), self.data['PRICE_HVS'].mean(), self.data['TOTAL'].mean()]
 
         dict_for_first_stats = {'columns': columns_name, 'rows': rows_name, 'data': [data_aver_value_per_year, data_aver_cost_per_year, data_aver_value, data_aver_cost]}
@@ -259,7 +263,7 @@ class DataProcessing():
             years_columns_name.append(str(first_year))
             years_values_for_data['cold'].append(self.data[self.data['YEAR'] == first_year]['DELTA_CVS'].mean())
             years_values_for_data['hot'].append(self.data[self.data['YEAR'] == first_year]['DELTA_HVS'].mean())
-            years_values_for_data['total'].append(self.data[self.data['YEAR'] == first_year]['DELTA_CVS'].mean() + self.data[self.data['YEAR'] == first_year]['DELTA_HVS'].mean())
+            years_values_for_data['total'].append(self.data[self.data['YEAR'] == first_year]['TOTAL_DELTA'].mean())
             years_cost_for_data['cold'].append(self.data[self.data['YEAR'] == first_year]['PRICE_CVS'].mean())
             years_cost_for_data['hot'].append(self.data[self.data['YEAR'] == first_year]['PRICE_HVS'].mean())
             years_cost_for_data['total'].append(self.data[self.data['YEAR'] == first_year]['TOTAL'].mean())
@@ -284,7 +288,7 @@ class DataProcessing():
         for month in self.month_list:
             cold_month_value_for_data.append(self.data[self.data['MONTH'] == month]['DELTA_CVS'].mean())
             hot_month_value_for_data.append(self.data[self.data['MONTH'] == month]['DELTA_HVS'].mean())
-            total_month_value_for_data.append(self.data[self.data['MONTH'] == month]['DELTA_CVS'].mean() + self.data[self.data['MONTH'] == month]['DELTA_HVS'].mean())
+            total_month_value_for_data.append(self.data[self.data['MONTH'] == month]['TOTAL_DELTA'].mean())
             cold_month_cost_for_data.append(self.data[self.data['MONTH'] == month]['PRICE_CVS'].mean())
             hot_month_cost_for_data.append(self.data[self.data['MONTH'] == month]['PRICE_HVS'].mean())
             total_month_cost_for_data.append(self.data[self.data['MONTH'] == month]['TOTAL'].mean())
