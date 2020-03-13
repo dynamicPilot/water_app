@@ -43,7 +43,6 @@ class DataProcessing():
         self.data_loader()
 
     def data_loader(self):
-        print(self.data_path)
         self.data = pd.read_csv(self.data_path, sep = '\t', header=0)
 
         if len(self.data) < self.month_number_to_plot:
@@ -132,7 +131,6 @@ class DataProcessing():
             ax.tick_params(axis='y', labelsize=22)
             plt.savefig(f'{self.path_to_graph_folder_new_month}/{tag}.png')
             plt.close('all')
-            print('new graph created')
             #plt.show()
 
     def delete_last_line_in_file(self):

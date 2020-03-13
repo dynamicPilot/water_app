@@ -158,8 +158,16 @@ class WaterForm(QWidget):
             return -1
             
     def save_values_to_data(self):
-        self.data_class.add_data(self.new_value_list)
-        self.new_value_list = ['', 2020, 0, 0]
-        self.new_data_analysis_window = NewValueAnalysis(self.data_class)
-        self.new_data_analysis_window.show()
+        if len(self.new_value_list[0])>2 and self.new_value_list[2]>=self.hvs_prev_month and self.new_value_list[3]>=self.cvs_prev_month:
+            self.data_class.add_data(self.new_value_list)
+            self.new_value_list = ['', 2020, 0, 0]
+            self.new_data_analysis_window = NewValueAnalysis(self.data_class)
+            self.new_data_analysis_window.show()
+        else:
+            mes_text = "Your valuesis incorrect.\nPlease, enter new values."
+            mes = QMessageBox()
+            mes.setWindowTitle('Message')
+            mes.setText(mes_text)
+            mes.exec()
+
 
