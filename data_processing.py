@@ -196,7 +196,6 @@ class DataProcessing():
         first_year = self.data['YEAR'].min()
         while first_year<= current_year:
             years_columns_name.append(str(first_year))
-            aver_cost = [self.data[self.data['YEAR'] == first_year]['PRICE_CVS'].mean(), self.data[self.data['YEAR'] == first_year]['PRICE_HVS'].mean(), self.data[self.data['YEAR'] == first_year]['TOTAL'].mean()]
             years_values_for_data['cold'].append(self.data[self.data['YEAR'] == first_year]['DELTA_CVS'].mean())
             years_values_for_data['hot'].append(self.data[self.data['YEAR'] == first_year]['DELTA_HVS'].mean())
             years_values_for_data['total'].append(self.data[self.data['YEAR'] == first_year]['DELTA_CVS'].mean() + self.data[self.data['YEAR'] == first_year]['DELTA_HVS'].mean())
@@ -211,16 +210,59 @@ class DataProcessing():
         dict_for_years_total_water_stats = {'columns': years_columns_name, 'rows': years_rows_name, 'data': [years_values_for_data['total'], years_cost_for_data['total']]}
         dict_for_years_stats = {'cold': dict_for_years_cold_water_stats, 'hot': dict_for_years_hot_water_stats, 'total': dict_for_years_total_water_stats}
         #print(dict_for_first_stats, dict_for_years_stats)
+
+        # Dictionary per month
+        month_rows_name = ['Cold Water', 'Hot Water', 'Total']
+        month_columns_name = self.month_list
+        cold_month_value_for_data = []
+        hot_month_value_for_data = []
+        total_month_value_for_data = []
+        cold_month_cost_for_data = []
+        hot_month_cost_for_data = []
+        total_month_cost_for_data = []
+        for month in self.month_list:
+            cold_month_value_for_data.append(self.data[self.data['MONTH'] == month]['DELTA_CVS'].mean())
+            hot_month_value_for_data.append(self.data[self.data['MONTH'] == month]['DELTA_HVS'].mean())
+            total_month_value_for_data.append(self.data[self.data['MONTH'] == month]['DELTA_CVS'].mean() + self.data[self.data['MONTH'] == month]['DELTA_HVS'].mean())
+            cold_month_cost_for_data.append(self.data[self.data['MONTH'] == month]['PRICE_CVS'].mean())
+            hot_month_cost_for_data.append(self.data[self.data['MONTH'] == month]['PRICE_HVS'].mean())
+            total_month_cost_for_data.append(self.data[self.data['MONTH'] == month]['TOTAL'].mean())
+
+        dict_for_month_value_stats = {'columns': month_columns_name, 'rows': month_rows_name, 'data': [cold_month_value_for_data, hot_month_value_for_data, total_month_value_for_data]}
+        dict_for_month_cost_stats = {'columns': month_columns_name, 'rows': month_rows_name, 'data': [cold_month_cost_for_data, hot_month_cost_for_data, total_month_cost_for_data]}
+
         
-        return dict_for_first_stats, dict_for_years_stats
-        
+        return dict_for_first_stats, dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats
+
+    def create_graphs_for_stats(self):
+        # Average per month
+        dict_for_first_stats, dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats = self.create_dict_for_stats()
+        self.create_average_per_month_graph(dict_for_month_cost_stats['data'][0], 'Cold Water Cost, rub', '#34495E')
+        self.create_average_per_month_graph(dict_for_month_cost_stats['data'][1], 'Hot Water Cost, rub', '#34495E')
+        self.create_average_per_month_graph(dict_for_month_cost_stats['data'][2], 'Water Cost, rub')
+
+    def create_average_per_month_graph(self, y_data, y_axis_label, bar_color = '#2471A3'):
+        colors = [bar_color] * len(self.month_list)
+        x_ticks = [i for i in range(len(self.month_list))]
+        x_labels = map(lambda x: self.month_mapping_shorter_dict[x], self.month_list)
+        fig = plt.figure(figsize = (10, 5), tight_layout = True)
+        ax = fig.add_subplot()
+        width = 0.9
+        ax.bar(x_ticks, y_data, width, color = colors)
+        ax.set_xticks(x_ticks)
+        ax.set_xticklabels(x_labels, size=20)
+        ax.set_xlabel('Month', size=25)
+        ax.set_ylabel(y_axis_label, size=25)
+        ax.tick_params(axis='y', labelsize=20)
+        #plt.savefig(f'temp/{tag}.png')
+        plt.show()
 
 
 
 
 
-#myData = DataProcessing()
-#myData.create_dict_for_stats()
+myData = DataProcessing()
+myData.create_graphs_for_stats()
 #myData.delete_last_line_in_file()
 #myData.create_graphs_to_new_value_analysis()
 #myData.calculate_prices()

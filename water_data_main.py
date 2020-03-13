@@ -10,7 +10,7 @@ import pandas as pd
 
 from data_processing import DataProcessing
 from new_data_analisys import NewValueAnalysis
-from show_stats_class import StatsAnalysis
+from show_stats_class import TableStatsAnalysis, GraphStatsAnalysis
 from water_form import WaterForm
 from history_class import DisplayHistory
 from settings_class import Settings
@@ -63,13 +63,21 @@ class MainWindow(QMainWindow):
         toolbar = self.addToolBar('History')
         toolbar.addAction(history_action)
 
-        # See stats
-        stats_action = QAction(QIcon('icons/stats.png'), 'Statistics', self)
-        stats_action.setShortcut('Ctrl+S')
-        stats_action.setStatusTip('See Statictics')
-        stats_action.triggered.connect(self.show_stats)
-        toolbar = self.addToolBar('Statistics')
-        toolbar.addAction(stats_action)
+        # See stats table
+        stats_table_action = QAction(QIcon('icons/stats_table.png'), 'Table Statistics', self)
+        stats_table_action.setShortcut('Ctrl+T')
+        stats_table_action.setStatusTip('See Table Statictics')
+        stats_table_action.triggered.connect(self.show_stats_tables)
+        toolbar = self.addToolBar('Table Statistics')
+        toolbar.addAction(stats_table_action)
+
+        # See stats graph
+        stats_graph_action = QAction(QIcon('icons/stats_graph.png'), 'Graph Statistics', self)
+        stats_graph_action.setShortcut('Ctrl+G')
+        stats_graph_action.setStatusTip('See Graph Statictics')
+        stats_graph_action.triggered.connect(self.show_stats_graph)
+        toolbar = self.addToolBar('Graph Statistics')
+        toolbar.addAction(stats_graph_action)
 
         # See forecast
         pred_action = QAction(QIcon('icons/f_cast.png'), 'Prediction', self)
@@ -109,12 +117,16 @@ class MainWindow(QMainWindow):
         self.settings_window = Settings(self.data_class)
         self.settings_window.show()
 
-    def show_stats(self):
-        self.stats_window = StatsAnalysis(self.data_class)
-        self.stats_window.show()
+    def show_stats_tables(self):
+        self.stats_table_window = TableStatsAnalysis(self.data_class)
+        self.stats_table_window.show()
 
     def show_prediction(self):
         pass
+
+    def show_stats_graph(self):
+        self.stats_graph_window = GraphStatsAnalysis(self.data_class)
+        self.stats_graph_window.show()
      
 
 if __name__ == '__main__':
