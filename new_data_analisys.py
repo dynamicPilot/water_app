@@ -2,21 +2,10 @@
 QWidget Class for new data analysis method
 
 """
-import config as c
-import sys
-import re
-import os.path
-
-import pandas as pd
-
-from data_processing import DataProcessing
-
-import PyQt5 as puqt5
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QWidget, QToolTip, QVBoxLayout, QHBoxLayout, QComboBox, QAction, 
-qApp, QMainWindow, QMessageBox, QLabel, QPushButton, QLineEdit, QInputDialog, 
-QTextEdit, QGridLayout, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QPlainTextEdit)
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QAction, 
+QMessageBox, QLabel, QPushButton, QLineEdit, QGridLayout, QApplication)
+from PyQt5.QtGui import QPixmap
 
 class NewValueAnalysis(QWidget):
     def __init__(self, data_class):

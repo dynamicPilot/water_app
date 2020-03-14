@@ -42,6 +42,7 @@ class DataProcessing():
 
         self.data_loader()
 
+    # Load data from file to pandas df
     def data_loader(self):
         self.data = pd.read_csv(self.data_path, sep = '\t', header=0)
 
@@ -49,9 +50,9 @@ class DataProcessing():
             self.month_number_to_plot = len(self.data)
 
         self.last_cvs_value = self.data['CVS'].loc[len(self.data)-1]
-        self.last_hvs_value = self.data['HVS'].loc[len(self.data)-1]
-       
+        self.last_hvs_value = self.data['HVS'].loc[len(self.data)-1]  
 
+    # Add new values to the and of the data file
     def add_data(self, value_array):
         file_to_write = open(self.data_path, 'a')
 
@@ -67,6 +68,7 @@ class DataProcessing():
 
         self.data_loader()
 
+    # Calculate deltas and prices
     def calculate_prices(self):
         self.data['DELTA_CVS'] = 0.00
         self.data['DELTA_HVS'] = 0.00
@@ -82,10 +84,11 @@ class DataProcessing():
             self.data['TOTAL'].loc[i] = self.data['PRICE_CVS'].loc[i] + self.data['PRICE_HVS'].loc[i]
             self.data['TOTAL_DELTA'].loc[i] = self.data['DELTA_CVS'].loc[i] + self.data['DELTA_HVS'].loc[i]
 
-
+    # Create dictionary with values to the new data analysis widget
     def data_to_new_value_analysis(self):
         self.calculate_prices()
         self.make_model_for_prediction()
+
         i = len(self.data)-1
         cvs_aver = [self.data['DELTA_CVS'].loc[:i].mean(), self.data['PRICE_CVS'].loc[:i].mean()]
         hvs_aver = [self.data['DELTA_HVS'].loc[:i].mean(), self.data['PRICE_HVS'].loc[:i].mean()]
@@ -109,8 +112,11 @@ class DataProcessing():
         #self.create_graphs_to_new_value_analysis()
         return result_dict
 
+    # Create graphs to the new data analysis widget
     def create_graphs_to_new_value_analysis(self):
         #self.data_to_new_value_analysis()
+
+        # Check directory for graphs saving
         if not os.path.exists(self.path_to_graph_folder_new_month):
             os.mkdir(self.path_to_graph_folder_new_month)
 
@@ -133,6 +139,7 @@ class DataProcessing():
             plt.close('all')
             #plt.show()
 
+    # Delete last values in the data file and update dataframe
     def delete_last_line_in_file(self):
         with open(self.data_path, 'r') as f:
             lines = f.readlines()
@@ -143,8 +150,10 @@ class DataProcessing():
 
         self.data_loader()
 
+    # Create model to predict deltas (KNRegression)
     def make_model_for_prediction(self):
         self.calculate_prices()
+
         self.data['MONTH_MAPPED'] = self.data['MONTH'].map(self.month_mapping_dict)
         self.last_month = self.data['MONTH_MAPPED'].loc[len(self.data)-1]
 
@@ -160,7 +169,7 @@ class DataProcessing():
             regular = StandardScaler()
             train_set = regular.fit_transform(train_set)
             test_set = regular.transform(test_set)
-            # Create and train the models for cold water
+            # Create and train the models
             model = KNeighborsRegressor(n_neighbors=10, weights='distance')
             train_score = []
             test_score = []
@@ -180,11 +189,12 @@ class DataProcessing():
             self.prediction_for_three_month[tag] = list(prediction)
 
 
-
+    # Create month dataframe for prediction
     def get_month_for_prediction(self, first_month):
         result = pd.DataFrame([first_month, (first_month + 1)%13, (first_month + 2)%13, (first_month + 3)%13], columns =['MONTH'])
         return result
 
+    # Create dictionary and graphs for prediction widget
     def create_content_for_prediction(self):
         # Check directory for plot picture saving
         if not os.path.exists(self.path_to_graph_folder_pred):
@@ -193,7 +203,7 @@ class DataProcessing():
         # Make prediction
         self.make_model_for_prediction()
 
-        # Prepair data to current year plots
+        # Prepair data to current year + prediction month plots
         df_to_plot = self.data[self.data['YEAR'] == self.current_year][['MONTH', 'PRICE_CVS', 'PRICE_HVS']].reset_index(drop=True)
         predicted_month = [self.last_month, (self.last_month + 1)%13, (self.last_month + 2)%13, (self.last_month + 3)%13]
         predicted_month = map(lambda x: self.month_mapping_reverce_dict[x], predicted_month)
@@ -216,10 +226,11 @@ class DataProcessing():
         total_data = [hot_data[i] + cold_data[i] for i in range(len(cold_data))]
         self.create_values_per_current_year_bar(current_year_month, total_data, self.path_to_graph_folder_pred, 'Water Cost, rub', 'total_cost', '#D7BDE2', 3, '#F9E79F')
         
+        # Create data dictionary
         dict_for_table = {'cold': cold_data[-3:], 'hot': hot_data[-3:], 'total': total_data[-3:], 'month': predicted_month[1:]}
         return dict_for_table
 
-
+    # Create dictionary from dataframe to history widget
     def create_dict_to_all_history(self):
         self.calculate_prices()
         data_dict = self.data.to_dict('split')
@@ -228,6 +239,7 @@ class DataProcessing():
     def save_data_to_excel(self):
         self.data.to_excel(f"{self.file_save_path}/history.xlsx", engine='xlsxwriter', float_format="%.3f")
 
+    # Update some const values and pathes
     def update_const(self, new_values_list):
         self.data_path = new_values_list[1]
         self.file_save_path = new_values_list[0]
@@ -236,13 +248,22 @@ class DataProcessing():
         self.month_number_to_plot = new_values_list[4]
         self.data_loader()
 
-
+    # Create dictionaries for stats widget
     def create_dict_for_stats(self):
+        """
+        Method returns four dictionaries:
+
+        - First dict with: average delta and cost for current year, average delta and cost (for all data)
+        - Second dict with: average deltas and costs for every year
+        - Third dict with: average deltas for every month for the current year
+        - Fourth dict with: average costs for every month for the current year
+
+        """
         self.calculate_prices()
+
         # Dictionary for the first table
         columns_name = ['Cold Water', 'Hot Water', 'Total']
         rows_name = ['Average value per year', 'Average cost per year', 'Average value', 'Average cost']
-
 
         data_aver_value_per_year = [self.data[self.data['YEAR'] == self.current_year]['DELTA_CVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['DELTA_HVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['TOTAL_DELTA'].mean()]
         data_aver_cost_per_year = [self.data[self.data['YEAR'] == self.current_year]['PRICE_CVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['PRICE_HVS'].mean(), self.data[self.data['YEAR'] == self.current_year]['TOTAL'].mean()]
@@ -253,7 +274,7 @@ class DataProcessing():
         
         # Dictionary for the second table
         years_rows_name = ['Average value per year', 'Average cost per year']
-        years_columns_name = []
+        years_columns_name = [] #years from the first to the current year
         years_values_for_data = {'cold': [], 'hot': [], 'total': []}
         years_cost_for_data = {'cold': [], 'hot': [], 'total': []}
         first_year = self.data['YEAR'].min()
@@ -267,14 +288,13 @@ class DataProcessing():
             years_cost_for_data['total'].append(self.data[self.data['YEAR'] == first_year]['TOTAL'].mean())
             first_year += 1
 
-        
         dict_for_years_cold_water_stats = {'columns': years_columns_name, 'rows': years_rows_name, 'data': [years_values_for_data['cold'], years_cost_for_data['cold']]}
         dict_for_years_hot_water_stats = {'columns': years_columns_name, 'rows': years_rows_name, 'data': [years_values_for_data['hot'], years_cost_for_data['hot']]}
         dict_for_years_total_water_stats = {'columns': years_columns_name, 'rows': years_rows_name, 'data': [years_values_for_data['total'], years_cost_for_data['total']]}
         dict_for_years_stats = {'cold': dict_for_years_cold_water_stats, 'hot': dict_for_years_hot_water_stats, 'total': dict_for_years_total_water_stats}
         #print(dict_for_first_stats, dict_for_years_stats)
 
-        # Dictionary per month
+        # Dictionary for tables per month
         month_rows_name = ['Cold Water', 'Hot Water', 'Total']
         month_columns_name = self.month_list
         cold_month_value_for_data = []
@@ -297,6 +317,7 @@ class DataProcessing():
         
         return dict_for_first_stats, dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats
 
+    # Create graphs for stats widget
     def create_graphs_for_stats(self):
 
         # Check directory for plot picture saving
@@ -305,6 +326,8 @@ class DataProcessing():
         
         # Average values in dictionaries
         dict_for_first_stats, dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats = self.create_dict_for_stats()
+        
+        # Create graphs (bar plot)
         self.create_average_per_month_bar(dict_for_month_cost_stats['data'][0], 'Cold Water Cost, rub', 'cold_cost', '#D6EAF8')
         self.create_average_per_month_bar(dict_for_month_cost_stats['data'][1], 'Hot Water Cost, rub', 'hot_cost', '#85C1E9')
         self.create_average_per_month_bar(dict_for_month_cost_stats['data'][2], 'Water Cost, rub', 'total_cost', '#2E86C1')
@@ -330,6 +353,15 @@ class DataProcessing():
 
 
     def create_average_per_month_bar(self, y_data, y_axis_label, file_suf = 'cost', bar_color = '#2471A3'):
+        """
+        Save all graphs (.png) to self.path_to_graph_folder_stats folder.
+
+        Method need:
+        - y_data: y values
+        - y_axis_label: label y axis and for the plot
+        - file_suf (default 'cost'): string suffict to put into graph file
+        - bar_color (default '#2471A3'): color for bar
+        """
         colors = [bar_color] * len(self.month_list)
         x_ticks = [i for i in range(len(self.month_list))]
         x_labels = map(lambda x: self.month_mapping_shorter_dict[x], self.month_list)
@@ -348,6 +380,15 @@ class DataProcessing():
         #plt.show()
 
     def create_average_per_years_bar(self, y_data, y_axis_label, file_suf = 'cost', bar_color = '#2471A3'):
+        """
+        Save all graphs (.png) to self.path_to_graph_folder_stats folder.
+
+        Method need:
+        - y_data: y values
+        - y_axis_label: label y axis and for the plot
+        - file_suf (default 'cost'): string suffict to put into graph file
+        - bar_color (default '#2471A3'): color for bar
+        """
         first_year = self.data['YEAR'].min()
         x_ticks = [year for year in range(first_year, self.current_year+1)]
         colors = [bar_color] * len(x_ticks)
@@ -365,13 +406,26 @@ class DataProcessing():
         plt.close('all')
         #plt.show()
 
-    def create_values_per_current_year_bar(self, x_label, y_data, path_name, y_axis_label, file_suf = 'cost', bar_color = '#2471A3', color_dif = 0, dif_color = '#F5B041'):
+    def create_values_per_current_year_bar(self, x_labels_list, y_data, path_name, y_axis_label, file_suf = 'cost', bar_color = '#2471A3', color_dif = 0, dif_color = '#F5B041'):
+        """
+        Save all graphs (.png) to path_name folder.
+
+        Method need:
+        - x_labels_list: labels array for x axis
+        - y_data: y values
+        - path_name: string path to folder where graphs will be saved
+        - y_axis_label: label y axis and for the plot
+        - file_suf (default 'cost'): string suffict to put into graph file
+        - bar_color (default '#2471A3'): color for bar
+        - color_dif (default 0): int n number to color n-last bars to different color
+        - dif_color (default '#F5B041'): different color for n-last bars
+        """
         if color_dif == 0:
-            colors = [bar_color] * len(x_label)
+            colors = [bar_color] * len(x_labels_list)
         else:
-            colors = [bar_color] * (len(x_label)-color_dif)+[dif_color]*color_dif
-        x_ticks = [i for i in range(len(x_label))]
-        x_labels = map(lambda x: self.month_mapping_shorter_dict[x], x_label)
+            colors = [bar_color] * (len(x_labels_list)-color_dif)+[dif_color]*color_dif
+        x_ticks = [i for i in range(len(x_labels_list))]
+        x_labels = map(lambda x: self.month_mapping_shorter_dict[x], x_labels_list)
         fig = plt.figure(figsize = (10, 5), tight_layout = True)
         ax = fig.add_subplot()
         width = 0.9

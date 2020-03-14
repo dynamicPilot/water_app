@@ -1,23 +1,14 @@
 """
-QWidget Class for method
+QWidget Class for water form method
 
 """
-import config as c
-import sys
 import re
-import os
 
-import pandas as pd
-
-from data_processing import DataProcessing
 from new_data_analisys import NewValueAnalysis
 
-import PyQt5 as puqt5
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QWidget, QToolTip, QVBoxLayout, QHBoxLayout, QComboBox, QAction, 
-qApp, QMainWindow, QMessageBox, QLabel, QPushButton, QLineEdit, QInputDialog, 
-QTextEdit, QGridLayout, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QPlainTextEdit)
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QAction, QMessageBox, 
+QLabel, QPushButton, QLineEdit, QInputDialog, QGridLayout, QApplication)
 
 class WaterForm(QWidget):
     def __init__(self, data_class):
@@ -131,11 +122,13 @@ class WaterForm(QWidget):
         self.cw_edit.setText(str(value))
         self.new_value_list[3] = value
 
+    # Show dialog window to input value
     def show_win_dialog_for_hot(self):
         text, ok = QInputDialog.getText(self, 'Input value',
             'Enter hot water counter value:')
 
         if ok:
+            # Check incorrent input
             if len(re.findall(r"[^\d\.]", str(text))) > 0 or len(str(text)) == 0:
                 value = 0.
             else:
@@ -144,11 +137,13 @@ class WaterForm(QWidget):
         else:
             return -1
             
+    # Show dialog window to input value
     def show_win_dialog_for_cold(self):
         text, ok = QInputDialog.getText(self, 'Input value',
             'Enter cold water counter value:')
 
         if ok:
+            # Check incorrent input
             if len(re.findall(r"[^\d\.]", str(text))) > 0 or len(str(text)) == 0:
                 value = 0.
             else:

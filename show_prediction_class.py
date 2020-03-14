@@ -2,22 +2,10 @@
 QWidget Class for prediction method
 
 """
-import config as c
-import sys
-import re
-
-import os.path
-
-import pandas as pd
-
-from data_processing import DataProcessing
-
-import PyQt5 as puqt5
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QAction, 
-qApp, QScrollArea, QMessageBox, QLabel, QPushButton, QLineEdit, QInputDialog, QGridLayout, 
-QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QSizePolicy)
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QAction, 
+QScrollArea, QLabel, QGridLayout, QApplication, QTableWidget, QTableWidgetItem, QSizePolicy)
+from PyQt5.QtGui import QPixmap
 
 class Prediction(QWidget):
     def __init__(self, data_class):
@@ -41,7 +29,6 @@ class Prediction(QWidget):
         header_label.setAlignment(QtCore.Qt.AlignCenter)
         v_layout.addWidget(header_label)
 
-
         data_table = self.create_table()
         v_layout.addWidget(data_table, alignment = QtCore.Qt.AlignCenter)
 
@@ -56,7 +43,6 @@ class Prediction(QWidget):
         t1_bar_label.setPixmap(t1_pixmap)
         t1_bar_label.setAlignment(QtCore.Qt.AlignCenter)
         v_layout.addWidget(t1_bar_label)
-
 
         t2_bar_label = QLabel()
         t2_pixmap = QPixmap(f'{self.path_to_graph_folder}/current_cold_cost.png')

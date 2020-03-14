@@ -3,20 +3,11 @@ QWidget Class for show settings method
 
 """
 import config
-import sys
 import re
-import os
 
-import pandas as pd
-
-from data_processing import DataProcessing
-
-import PyQt5 as puqt5
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QWidget, QToolTip, QVBoxLayout, QHBoxLayout, QComboBox, QAction, 
-qApp, QMainWindow, QMessageBox, QLabel, QPushButton, QLineEdit, QInputDialog, 
-QTextEdit, QGridLayout, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QPlainTextEdit)
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QAction, QMessageBox, QLabel, 
+QPushButton, QLineEdit, QInputDialog, QGridLayout, QApplication, QFileDialog)
 
 class Settings(QWidget):
     def __init__(self, data_class):

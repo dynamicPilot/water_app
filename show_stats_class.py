@@ -2,22 +2,10 @@
 QWidget Class for show_stats method
 
 """
-import config as c
-import sys
-import re
-
-import os.path
-
-import pandas as pd
-
-from data_processing import DataProcessing
-
-import PyQt5 as puqt5
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QAction, 
-qApp, QScrollArea, QMessageBox, QLabel, QPushButton, QLineEdit, QInputDialog, QGridLayout, 
-QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QSizePolicy)
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QAction, 
+QScrollArea, QLabel, QGridLayout, QApplication, QTableWidget, QTableWidgetItem, QSizePolicy)
+from PyQt5.QtGui import QPixmap
 
 class TableStatsAnalysis(QWidget):
     def __init__(self, data_class):

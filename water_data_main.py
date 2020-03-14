@@ -1,12 +1,8 @@
 """
-
+Main script
 
 """
-import config as c
 import sys
-import re
-
-import pandas as pd
 
 from data_processing import DataProcessing
 from new_data_analisys import NewValueAnalysis
@@ -16,33 +12,22 @@ from history_class import DisplayHistory
 from settings_class import Settings
 from show_prediction_class import Prediction
 
-import PyQt5 as puqt5
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QWidget, QToolTip, QVBoxLayout, QHBoxLayout, QComboBox, QAction, 
-qApp, QMainWindow, QMessageBox, QLabel, QPushButton, QLineEdit, QInputDialog, 
-QTextEdit, QGridLayout, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QPlainTextEdit)
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt5.QtWidgets import (QAction, qApp, QMainWindow, QMessageBox, QApplication)
+from PyQt5.QtGui import QIcon, QFont
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.data_class = DataProcessing()
-        
         self.initUI()
         
-
     def initUI(self):
-        #QToolTip.setFont(QFont('SansSerif', 10))
-
+        # set central widget
         self.c_widget = WaterForm(self.data_class)
         self.setCentralWidget(self.c_widget)
         self.create_toolbar()
 
-        #set menubar
-        #menubar = self.menuBar()
-        #file_menu = menubar.addMenu('&File')
-
-        #set window params
+        # set window params
         self.setGeometry(300, 300, 350, 300)
         self.setWindowTitle('Water Data App')
         self.show()
@@ -90,7 +75,7 @@ class MainWindow(QMainWindow):
 
         # Settings
         settings_action = QAction(QIcon('icons/conf.png'), 'Settings', self)
-        #settings_action.setShortcut('Ctrl+S')
+        settings_action.setShortcut('Ctrl+S')
         settings_action.setStatusTip('See Settings')
         settings_action.triggered.connect(self.show_settings)
         toolbar = self.addToolBar('Settings')
