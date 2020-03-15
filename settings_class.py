@@ -136,7 +136,7 @@ class Settings(QWidget):
             elif value == -1:
                 return
             else:
-                mes_text = "Your value is incorrect. \nPlease, enter new value for {}.".format(tag)
+                mes_text = "Your value is incorrect. \nPlease, enter new value for {}. \nUse '.' as separator.".format(tag)
                 mes = QMessageBox()
                 mes.setWindowTitle('Message')
                 mes.setText(mes_text)
@@ -154,7 +154,7 @@ class Settings(QWidget):
             elif value == -1:
                 return
             else:
-                mes_text = "Your value is incorrect. \nPlease, enter new value for {}.".format(tag)
+                mes_text = "Your value is incorrect. \nPlease, enter new value for {}. \nUse '.' as separator.".format(tag)
                 mes = QMessageBox()
                 mes.setWindowTitle('Message')
                 mes.setText(mes_text)

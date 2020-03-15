@@ -13,7 +13,7 @@ QLabel, QPushButton, QLineEdit, QInputDialog, QGridLayout, QApplication)
 class WaterForm(QWidget):
     def __init__(self, data_class):
         super().__init__()
-        self.new_value_list = ['', 2020, 0, 0]
+        #self.new_value_list = ['', 2020, 0, 0]
         self.data_class = data_class
         self.initUI()
         
@@ -23,9 +23,6 @@ class WaterForm(QWidget):
         year_label = QLabel('Set year: ')
         hw_label = QLabel('Hot Water value: ')
         cw_label = QLabel('Cold Water value: ')
-
-        self.cvs_prev_month = self.data_class.last_cvs_value
-        self.hvs_prev_month = self.data_class.last_hvs_value
 
         self.month_list = QComboBox(self)
         self.month_list.addItems(['January', 'February', 'March', 'April', 'May', 'June', 'July', 
@@ -79,48 +76,48 @@ class WaterForm(QWidget):
         self.setLayout(v_layout)
 
     def month_activate(self, text):
-        self.new_value_list[0] = str(text)
-        print(self.new_value_list)
+        self.data_class.new_value_list[0] = str(text)
+        print(self.data_class.new_value_list)
 
     def year_activate(self, text):
-        self.new_value_list[1] = int(text)
-        print(self.new_value_list)
+        self.data_class.new_value_list[1] = int(text)
+        print(self.data_class.new_value_list)
 
     def show_dialog_for_hot(self):
         mark = True
         while mark:
             value = self.show_win_dialog_for_hot()
-            if value > self.hvs_prev_month:
+            if value > self.data_class.last_hvs_value:
                 mark = False
             elif value == -1:
                 return
             else:
-                mes_text = "Your value {:.3f} is incorrect. \nPlease, enter new value for hot water, which is more then {:.3f}.".format(value, self.hvs_prev_month)
+                mes_text = "Your value {:.3f} is incorrect. \nPlease, enter new value for hot water, which is more then {:.3f}.\nUse '.' as separator.".format(value, self.data_class.last_hvs_value)
                 mes = QMessageBox()
                 mes.setWindowTitle('Message')
                 mes.setText(mes_text)
                 mes.exec()
 
         self.hw_edit.setText(str(value))
-        self.new_value_list[2] = value
+        self.data_class.new_value_list[2] = value
 
     def show_dialog_for_cold(self):
         mark = True
         while mark:
             value = self.show_win_dialog_for_cold()
-            if value > self.cvs_prev_month:
+            if value > self.data_class.last_cvs_value:
                 mark = False
             elif value == -1:
                 return
             else:
-                mes_text = "Your value {:.3f} is incorrect. \nPlease, enter new value for cold water, which is more then {:.3f}.".format(value, self.cvs_prev_month)
+                mes_text = "Your value {:.3f} is incorrect. \nPlease, enter new value for cold water, which is more then {:.3f}.\nUse '.' as separator.".format(value, self.data_class.last_cvs_value)
                 mes = QMessageBox()
                 mes.setWindowTitle('Message')
                 mes.setText(mes_text)
                 mes.exec()
 
         self.cw_edit.setText(str(value))
-        self.new_value_list[3] = value
+        self.data_class.new_value_list[3] = value
 
     # Show dialog window to input value
     def show_win_dialog_for_hot(self):
@@ -153,9 +150,8 @@ class WaterForm(QWidget):
             return -1
             
     def save_values_to_data(self):
-        if len(self.new_value_list[0])>2 and self.new_value_list[2]>=self.hvs_prev_month and self.new_value_list[3]>=self.cvs_prev_month:
-            self.data_class.add_data(self.new_value_list)
-            self.new_value_list = ['', 2020, 0, 0]
+        if len(self.data_class.new_value_list[0])>2 and self.data_class.new_value_list[2]>=self.data_class.last_hvs_value and self.data_class.new_value_list[3]>=self.data_class.last_cvs_value:
+            self.data_class.add_data()
             self.new_data_analysis_window = NewValueAnalysis(self.data_class)
             self.new_data_analysis_window.show()
         else:

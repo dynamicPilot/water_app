@@ -19,13 +19,14 @@ class TableStatsAnalysis(QWidget):
         self.setGeometry(300, 100, 1000, 800)
         self.setWindowTitle('Table Statistics')
 
-        gen_data_dict, year_data_dict, month_value_dict, month_cost_dict = self.data_class.create_dict_for_stats()
+        gen_data_dict, year_data_dict, month_value_dict, month_cost_dict, current_year_dict = self.data_class.create_dict_for_stats()
         gen_data_table = self.create_table(gen_data_dict)
         year_cold_water_data_table = self.create_table(year_data_dict['cold'])
         year_hot_water_data_table = self.create_table(year_data_dict['hot'])
         year_total_water_data_table = self.create_table(year_data_dict['total'])
         month_value_data_table = self.create_table(month_value_dict, 15)
         month_cost_data_table = self.create_table(month_cost_dict, 15)
+        current_year_data_table = self.create_table(current_year_dict)
 
         table_widget = QWidget()
         table_widget.setContentsMargins(0, 0, 0, 0)
@@ -35,6 +36,12 @@ class TableStatsAnalysis(QWidget):
         header_label.setStyleSheet("font: 18pt")
         header_label.setAlignment(QtCore.Qt.AlignCenter)
         v_layout.addWidget(header_label)
+
+        table_0_header_label = QLabel('<b>Average values</b>', self, margin = 4)
+        table_0_header_label.setStyleSheet("font: 14pt")
+        table_0_header_label.setAlignment(QtCore.Qt.AlignCenter)
+        v_layout.addWidget(table_0_header_label)
+        v_layout.addWidget(current_year_data_table, alignment = QtCore.Qt.AlignCenter)
 
         table_1_header_label = QLabel('<b>Average values</b>', self, margin = 4)
         table_1_header_label.setStyleSheet("font: 14pt")

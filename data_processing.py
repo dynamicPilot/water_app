@@ -1,12 +1,11 @@
 import pandas as pd
-import numpy as np
+#import numpy as np
 from matplotlib import pyplot as plt
 import datetime
 import os
 
 import config as c
 
-from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -28,6 +27,8 @@ class DataProcessing():
         self.prediction_for_three_month = {'cold': None, 'hot': None}
         self.last_month = None
 
+        self.new_value_list = ['', 2020, 0, 0]
+
         self.current_year = datetime.date.today()
         self.current_year = int(self.current_year.year)
 
@@ -40,6 +41,7 @@ class DataProcessing():
         self.month_mapping_shorter_dict = {'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr', 'May':'May', 'June': 'Jun', 'July': 'Jul', 
         'August': 'Aug', 'September':'Sep', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'}
 
+        self.create_temp_folder()
         self.data_loader()
 
     # Load data from file to pandas df
@@ -53,18 +55,20 @@ class DataProcessing():
         self.last_hvs_value = self.data['HVS'].loc[len(self.data)-1]  
 
     # Add new values to the and of the data file
-    def add_data(self, value_array):
+    def add_data(self):
         file_to_write = open(self.data_path, 'a')
 
         file_to_write.write('\n')
-        file_to_write.write(value_array[0])
+        file_to_write.write(self.new_value_list[0])
         file_to_write.write('\t')
-        file_to_write.write('{:04d}'.format(int(value_array[1])))
+        file_to_write.write('{:04d}'.format(int(self.new_value_list[1])))
         file_to_write.write('\t')
-        file_to_write.write('{:.3f}'.format(float(value_array[2])))
+        file_to_write.write('{:.3f}'.format(float(self.new_value_list[3])))
         file_to_write.write('\t')
-        file_to_write.write('{:.3f}'.format(float(value_array[3])))
+        file_to_write.write('{:.3f}'.format(float(self.new_value_list[2])))
         file_to_write.close()
+
+        self.new_value_list = ['', 2020, 0, 0]
 
         self.data_loader()
 
@@ -149,6 +153,7 @@ class DataProcessing():
             f.writelines(lines)
 
         self.data_loader()
+        self.new_value_list = ['', 2020, 0, 0]
 
     # Create model to predict deltas (KNRegression)
     def make_model_for_prediction(self):
@@ -255,8 +260,9 @@ class DataProcessing():
 
         - First dict with: average delta and cost for current year, average delta and cost (for all data)
         - Second dict with: average deltas and costs for every year
-        - Third dict with: average deltas for every month for the current year
-        - Fourth dict with: average costs for every month for the current year
+        - Third dict with: average deltas for every month
+        - Fourth dict with: average costs for every month
+        - Fifth dict with: current year costs
 
         """
         self.calculate_prices()
@@ -314,8 +320,17 @@ class DataProcessing():
         dict_for_month_value_stats = {'columns': month_columns_name, 'rows': month_rows_name, 'data': [cold_month_value_for_data, hot_month_value_for_data, total_month_value_for_data]}
         dict_for_month_cost_stats = {'columns': month_columns_name, 'rows': month_rows_name, 'data': [cold_month_cost_for_data, hot_month_cost_for_data, total_month_cost_for_data]}
 
+        #Dictionary fot current year cost
+        current_rows_name = ['Cold Water', 'Hot Water', 'Total']
+        df_to_plot = self.data[self.data['YEAR'] == self.current_year][['MONTH', 'PRICE_CVS', 'PRICE_HVS', 'TOTAL']].reset_index(drop=True)
+        current_year_month = list(df_to_plot['MONTH'])
+        cold_data = list(df_to_plot['PRICE_CVS'])
+        hot_data = list(df_to_plot['PRICE_HVS'])
+        total_data = list(df_to_plot['TOTAL'])
+
+        dict_for_current_year = {'columns': current_year_month, 'rows': current_rows_name, 'data': [cold_data, hot_data, total_data]}
         
-        return dict_for_first_stats, dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats
+        return dict_for_first_stats, dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats, dict_for_current_year
 
     # Create graphs for stats widget
     def create_graphs_for_stats(self):
@@ -325,7 +340,7 @@ class DataProcessing():
             os.mkdir(self.path_to_graph_folder_stats)
         
         # Average values in dictionaries
-        dict_for_first_stats, dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats = self.create_dict_for_stats()
+        dict_for_years_stats, dict_for_month_value_stats, dict_for_month_cost_stats = self.create_dict_for_stats()[1:4]
         
         # Create graphs (bar plot)
         self.create_average_per_month_bar(dict_for_month_cost_stats['data'][0], 'Cold Water Cost, rub', 'cold_cost', '#D6EAF8')
@@ -439,6 +454,11 @@ class DataProcessing():
         plt.savefig(f'{path_name}/current_{file_suf}.png')
         plt.close('all')
         #plt.show()
+
+    def create_temp_folder(self):
+        # Check directory for plot picture saving
+        if not os.path.exists('temp'):
+            os.mkdir('temp')
 
 
 #myData = DataProcessing()
